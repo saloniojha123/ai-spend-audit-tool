@@ -113,8 +113,14 @@ export default function AISpendAudit() {
               <p className="text-indigo-100 max-w-md italic">
                 "Based on your spend of ${currentMonthlyTotal}/mo, we found that optimizing seats and using Credex Credits can reduce your costs significantly."
               </p>
-              <button className="bg-white text-indigo-600 px-6 py-3 rounded-full font-bold shadow-lg hover:bg-indigo-50 transition-all">
+              {/* <button className="bg-white text-indigo-600 px-6 py-3 rounded-full font-bold shadow-lg hover:bg-indigo-50 transition-all">
                 Claim Savings via Credex
+              </button> */}
+              <button 
+               onClick={() => alert(`Redirecting to Credex secure checkout to save $${annualSavings.toFixed(0)}!`)}
+               className="bg-white text-indigo-600 px-6 py-3 rounded-full font-bold shadow-lg hover:bg-indigo-50 transition-all active:scale-95"
+               >
+               Claim Savings via Credex
               </button>
             </div>
           </section>
