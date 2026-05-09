@@ -1,102 +1,123 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Calculator, PieChart, TrendingDown, AlertCircle } from "lucide-react";
+import { Plus, Trash2, Calculator, Save, TrendingUp, AlertCircle } from "lucide-react";
 
-export default function AuditPage() {
-  const [entries, setEntries] = useState<{id: string, name: string, cost: string}[]>([]);
+interface Tool {
+  name: string;
+  monthlySpend: number;
+  teamSize: number;
+}
+
+export default function AISpendAudit() {
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [name, setName] = useState('');
+  const [spend, setSpend] = useState('');
+  const [team, setTeam] = useState('');
   const [showResults, setShowResults] = useState(false);
 
+  // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('audit-data');
-    if (saved) setEntries(JSON.parse(saved));
+    const saved = localStorage.getItem('audit-tools');
+    if (saved) setTools(JSON.parse(saved));
   }, []);
 
+  // Save to localStorage whenever tools change
   useEffect(() => {
-    localStorage.setItem('audit-data', JSON.stringify(entries));
-  }, [entries]);
+    localStorage.setItem('audit-tools', JSON.stringify(tools));
+  }, [tools]);
 
   const addTool = () => {
-    setEntries([...entries, { id: crypto.randomUUID(), name: '', cost: '' }]);
+    if (name && spend && team) {
+      setTools([...tools, { name, monthlySpend: Number(spend), teamSize: Number(team) }]);
+      setName(''); setSpend(''); setTeam('');
+      setShowResults(false);
+    }
+  };
+
+  const removeTool = (index: number) => {
+    setTools(tools.filter((_, i) => i !== index));
     setShowResults(false);
   };
 
-  // DAY 3 LOGIC: The Audit Calculations
-  const monthlyTotal = entries.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0);
-  const yearlyTotal = monthlyTotal * 12;
-  const potentialSavings = yearlyTotal * 0.3; // Estimated 30% optimization for Credex clients
+  // --- THE AUDIT ENGINE (MATH LOGIC) ---
+  const currentMonthlyTotal = tools.reduce((sum, tool) => sum + tool.monthlySpend, 0);
+  const optimalMonthlyTotal = currentMonthlyTotal * 0.7; // Credex 30% Optimization Rule
+  const annualSavings = (currentMonthlyTotal - optimalMonthlyTotal) * 12;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-slate-50 p-8 font-sans text-slate-900">
+      <div className="max-w-4xl mx-auto space-y-8">
         
-        {/* INPUT SECTION */}
-        <div className="bg-white shadow-xl rounded-2xl border border-slate-200 overflow-hidden">
-          <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
-            <h1 className="text-xl font-bold flex items-center gap-2">
-              <Calculator className="text-blue-400" /> AI Spend Audit
-            </h1>
-            <button onClick={addTool} className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm transition">
-              + Add Tool
+        <header className="text-center space-y-2">
+          <h1 className="text-4xl font-extrabold tracking-tight text-indigo-600">AI Spend Audit Tool</h1>
+          <p className="text-slate-500">Identify overspending and reclaim your budget with Credex.</p>
+        </header>
+
+        {/* Input Section */}
+        <section className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input placeholder="Tool (e.g. ChatGPT)" value={name} onChange={(e)=>setName(e.target.value)} className="p-2 border rounded" />
+            <input type="number" placeholder="Monthly Spend ($)" value={spend} onChange={(e)=>setSpend(e.target.value)} className="p-2 border rounded" />
+            <input type="number" placeholder="Team Size" value={team} onChange={(e)=>setTeam(e.target.value)} className="p-2 border rounded" />
+            <button onClick={addTool} className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 flex items-center justify-center gap-2">
+              <Plus size={18} /> Add Tool
             </button>
           </div>
-          <div className="p-6 space-y-4">
-            {entries.map(tool => (
-              <div key={tool.id} className="flex gap-4 items-center">
-                <input 
-                  placeholder="Tool Name" 
-                  className="flex-1 p-2 border rounded-md" 
-                  value={tool.name}
-                  onChange={(e) => {setEntries(entries.map(t => t.id === tool.id ? {...t, name: e.target.value} : t)); setShowResults(false);}}
-                />
-                <input 
-                  type="number" placeholder="$ / mo" 
-                  className="w-24 p-2 border rounded-md" 
-                  value={tool.cost}
-                  onChange={(e) => {setEntries(entries.map(t => t.id === tool.id ? {...t, cost: e.target.value} : t)); setShowResults(false);}}
-                />
-                <button onClick={() => setEntries(entries.filter(t => t.id !== tool.id))} className="text-red-400">
-                  <Trash2 size={20} />
-                </button>
+        </section>
+
+        {/* Tools List */}
+        <div className="space-y-3">
+          {tools.map((tool, index) => (
+            <div key={index} className="flex justify-between items-center bg-white p-4 rounded-lg border border-slate-100">
+              <div>
+                <span className="font-bold">{tool.name}</span>
+                <span className="text-slate-400 ml-4">${tool.monthlySpend}/mo</span>
+                <span className="text-slate-400 ml-4">{tool.teamSize} seats</span>
               </div>
-            ))}
-            {entries.length > 0 && (
-              <button 
-                onClick={() => setShowResults(true)}
-                className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold mt-4 hover:bg-black transition"
-              >
-                Run Savings Audit →
-              </button>
-            )}
-          </div>
+              <button onClick={() => removeTool(index)} className="text-red-400 hover:text-red-600"><Trash2 size={18}/></button>
+            </div>
+          ))}
         </div>
 
-        {/* DAY 3: RESULTS SECTION (The Logic in Action) */}
-        {showResults && entries.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in zoom-in duration-500">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-blue-500">
-              <div className="text-slate-400 text-sm font-bold uppercase mb-2 flex items-center gap-2">
-                <PieChart size={16} /> Annual Spend
+        {tools.length > 0 && (
+          <button 
+            onClick={() => setShowResults(true)} 
+            className="w-full bg-slate-900 text-white p-4 rounded-xl font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+          >
+            <Calculator size={20} /> Run Audit Engine
+          </button>
+        )}
+
+        {/* RESULTS CARD (THE HERO SECTION) */}
+        {showResults && (
+          <section className="bg-indigo-600 text-white p-8 rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-start justify-between">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 bg-indigo-500 w-fit px-3 py-1 rounded-full text-sm font-medium">
+                  <TrendingUp size={16} /> Audit Complete
+                </div>
+                <h2 className="text-2xl font-bold">Your Optimization Potential</h2>
+                <div className="space-y-1">
+                  <p className="text-5xl font-black text-white">${annualSavings.toFixed(0)}</p>
+                  <p className="text-indigo-100 text-lg">Total Annual Savings Identified</p>
+                </div>
               </div>
-              <div className="text-3xl font-black">${yearlyTotal.toLocaleString()}</div>
-              <p className="text-xs text-slate-500 mt-2">Total cost over 12 months</p>
+              <div className="hidden md:block">
+                <AlertCircle size={80} className="text-indigo-400 opacity-50" />
+              </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-green-500">
-              <div className="text-slate-400 text-sm font-bold uppercase mb-2 flex items-center gap-2">
-                <TrendingDown size={16} /> Potential Savings
-              </div>
-              <div className="text-3xl font-black text-green-600">${potentialSavings.toLocaleString()}</div>
-              <p className="text-xs text-slate-500 mt-2">With Credex Optimization</p>
-            </div>
+            <hr className="my-6 border-indigo-500" />
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-amber-500">
-              <div className="text-slate-400 text-sm font-bold uppercase mb-2 flex items-center gap-2">
-                <AlertCircle size={16} /> Efficiency Score
-              </div>
-              <div className="text-3xl font-black text-amber-500">72%</div>
-              <p className="text-xs text-slate-500 mt-2">Based on tool overlap</p>
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+              <p className="text-indigo-100 max-w-md italic">
+                "Based on your spend of ${currentMonthlyTotal}/mo, we found that optimizing seats and using Credex Credits can reduce your costs significantly."
+              </p>
+              <button className="bg-white text-indigo-600 px-6 py-3 rounded-full font-bold shadow-lg hover:bg-indigo-50 transition-all">
+                Claim Savings via Credex
+              </button>
             </div>
-          </div>
+          </section>
         )}
       </div>
     </div>
