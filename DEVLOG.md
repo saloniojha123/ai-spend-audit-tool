@@ -37,3 +37,12 @@ Activity: Implemented the Audit Engine math logic to calculate a 30% optimizatio
 Learnings: Financial logic must be hardcoded and defensible to satisfy the "Entrepreneurial Thinking" metric.
 
 Hours Worked: 3 hours.
+
+
+Day 5: May 10, 2026
+
+Activity: Developed a Next.js API Route (/api/audit-summary) for AI-generated audit summaries. Resolved a 405 Method Not Allowed error by transitioning from default exports to named exports for HTTP methods. Implemented asynchronous "Loading" states and fallback logic for the UI to handle API latency.
+
+Learnings: Server-side API routes are essential for securing sensitive logic. Proper handling of loading states and error boundaries significantly improves the perceived quality of an application.
+
+Hours Worked: 3 hours.
