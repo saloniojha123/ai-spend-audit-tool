@@ -1,37 +1,41 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Plus, Trash2, Calculator, Save, Loader2, CheckCircle2, X } from "lucide-react";
+import { Plus, Loader2, CheckCircle2, X, Info } from "lucide-react";
 
 export default function AuditTool() {
-  // Existing Audit State
+  // --- STATE MANAGEMENT ---
   const [tools, setTools] = useState<{ id: number; name: string; cost: number }[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const [aiSummary, setAiSummary] = useState("");
-
-  // Day 6: Lead Capture State
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const [leadData, setLeadData] = useState({ email: "", name: "", company: "" });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Persistence Logic
+  // --- INITIALIZATION ---
   useEffect(() => {
     const saved = localStorage.getItem('audit-tools');
-    if (saved) setTools(JSON.parse(saved));
+    if (saved) {
+      setTools(JSON.parse(saved));
+    } else {
+      setTools([{ id: Date.now(), name: "", cost: 0 }]);
+    }
   }, []);
 
+  // --- HANDLERS ---
   const addTool = () => {
-    const newTools = [...tools, { id: Date.now(), name: "", cost: 0 }];
-    setTools(newTools);
-    localStorage.setItem('audit-tools', JSON.stringify(newTools));
+    const newTool = { id: Date.now(), name: "", cost: 0 };
+    const updatedTools = [...tools, newTool];
+    setTools(updatedTools);
+    localStorage.setItem('audit-tools', JSON.stringify(updatedTools));
   };
 
   const handleAudit = async () => {
     setLoading(true);
     setShowResults(true);
-    // Simulate AI summary fetch
+    // Simulate AI analysis logic
     setTimeout(() => {
-      setAiSummary("Based on your spend, you are overpaying for seat licenses. Switching to Credex bulk credits could save you roughly 30% annually.");
+      setAiSummary("Analysis complete: You are currently exposed to 'License Bloat'. By moving these tools to Credex's Arbitrage model, we can reduce your monthly burn by approximately 30% through credit consolidation.");
       setLoading(false);
     }, 1500);
   };
@@ -39,39 +43,51 @@ export default function AuditTool() {
   const submitLead = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Logic to save to database would go here
     setTimeout(() => {
       setIsSubmitted(true);
       setLoading(false);
-      console.log("Lead Captured:", leadData);
-    }, 1000);
+    }, 1200);
   };
 
-  const monthlyTotal = tools.reduce((sum, tool) => sum + Number(tool.cost), 0);
+  // --- CALCULATIONS ---
+  const monthlyTotal = tools.reduce((sum, tool) => sum + (Number(tool.cost) || 0), 0);
   const annualSavings = (monthlyTotal * 0.3) * 12;
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-4xl font-bold text-gray-900">AI Spend Audit Engine</h1>
+    <main className="min-h-screen bg-slate-50 p-6 md:p-12">
+      <div className="max-w-4xl mx-auto space-y-10">
         
-        {/* Input Section */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        {/* HEADER */}
+        <header className="space-y-2">
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            AI Spend Audit Engine
+          </h1>
+          <p className="text-slate-500 text-lg">Analyze your SaaS footprint and unlock Credex arbitrage savings.</p>
+        </header>
+
+        {/* INPUT SECTION */}
+        <section className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+          <div className="flex items-center gap-2 text-slate-700 font-semibold mb-2">
+            <Info size={18} />
+            <span>Enter your monthly AI tool expenditures</span>
+          </div>
+          
           {tools.map((tool) => (
-            <div key={tool.id} className="flex gap-4 mb-4">
-              <input 
-                placeholder="Tool Name" 
-                className="flex-1 p-2 border rounded"
-                value={tool.name}
+            <div key={`tool-row-${tool.id}`} className="flex gap-4 animate-in fade-in duration-300"> 
+             <input 
+            placeholder="e.g. OpenAI, Midjourney" 
+            className="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-500 text-slate-900"
+            value={tool.name}
                 onChange={(e) => {
                   const newTools = tools.map(t => t.id === tool.id ? {...t, name: e.target.value} : t);
                   setTools(newTools);
                 }}
               />
               <input 
-                type="number" 
-                placeholder="Monthly Cost" 
-                className="w-32 p-2 border rounded"
+               type="number" 
+                placeholder="$0.00" 
+               className="w-36 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-500 text-slate-900"
+               value={tool.cost || ''}
                 onChange={(e) => {
                   const newTools = tools.map(t => t.id === tool.id ? {...t, cost: Number(e.target.value)} : t);
                   setTools(newTools);
@@ -79,88 +95,105 @@ export default function AuditTool() {
               />
             </div>
           ))}
-          <button onClick={addTool} className="flex items-center gap-2 text-blue-600 font-medium">
-            <Plus size={20} /> Add Tool
+          
+          <button 
+            onClick={addTool} 
+            className="flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors py-2"
+          >
+            <Plus size={20} strokeWidth={3} /> Add Another Tool
           </button>
-        </div>
+        </section>
 
         <button 
           onClick={handleAudit}
-          className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:bg-gray-800 transition-all"
+          disabled={monthlyTotal === 0}
+          className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-xl hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Run Audit Engine
+          {loading && !showResults ? "Analyzing..." : "Generate Audit Results"}
         </button>
 
-        {/* Results Section */}
+        {/* RESULTS SECTION */}
         {showResults && (
-          <div className="bg-blue-50 border-2 border-blue-200 p-8 rounded-2xl animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-blue-600 font-semibold uppercase tracking-wider text-sm">Potential Annual Savings</p>
-                <h2 className="text-5xl font-black text-blue-900 mt-2">${annualSavings.toLocaleString()}</h2>
+          <section className="bg-blue-600 text-white p-8 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-500">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-8">
+              <div className="space-y-1 text-center md:text-left">
+                <p className="text-blue-100 font-medium uppercase tracking-widest text-xs">Estimated Annual Savings</p>
+                <h2 className="text-6xl font-black">${annualSavings.toLocaleString()}</h2>
               </div>
               <button 
                 onClick={() => setIsLeadModalOpen(true)}
-                className="bg-blue-600 text-white px-8 py-4 rounded-full font-bold shadow-lg hover:bg-blue-700 transition-all active:scale-95"
+                className="bg-white text-blue-600 px-10 py-5 rounded-2xl font-black text-lg shadow-lg hover:bg-blue-50 transition-all active:scale-95"
               >
-                Claim Savings via Credex
+                Claim This Discount
               </button>
             </div>
-            <div className="mt-6 p-4 bg-white rounded-lg border border-blue-100 italic text-gray-700">
-              {loading ? "Generating AI Insights..." : aiSummary}
+            
+            <div className="mt-8 p-5 bg-blue-700/50 rounded-xl border border-blue-400/30 backdrop-blur-sm">
+              <p className="text-blue-50 italic leading-relaxed">
+                {loading ? (
+                  <span className="flex items-center gap-3"><Loader2 className="animate-spin" /> AI is crunching your cost benchmarks...</span>
+                ) : (
+                  `" ${aiSummary} "`
+                )}
+              </p>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Lead Capture Modal */}
+        {/* LEAD CAPTURE MODAL */}
         {isLeadModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl max-w-md w-full p-8 relative shadow-2xl">
-              <button onClick={() => setIsLeadModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <X size={24} />
+          <div className="fixed inset-0 bg-slate-900/80 flex items-center justify-center p-4 z-50 backdrop-blur-md transition-opacity">
+            <div className="bg-white rounded-3xl max-w-md w-full p-10 relative shadow-2xl animate-in fade-in slide-in-from-bottom-8">
+              <button 
+                onClick={() => setIsLeadModalOpen(false)} 
+                className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X size={28} />
               </button>
 
               {!isSubmitted ? (
                 <form onSubmit={submitLead} className="space-y-6">
-                  <div className="text-center">
-                    <h3 className="text-2xl font-bold text-gray-900">Lock In Your Savings</h3>
-                    <p className="text-gray-500 mt-2">Enter your details and a Credex specialist will apply your {annualSavings > 1000 ? 'high-volume' : 'startup'} discount.</p>
+                  <div className="text-center space-y-2">
+                    <h3 className="text-3xl font-black text-slate-900">Final Step</h3>
+                    <p className="text-slate-500 font-medium">Get your personalized savings report and unlock Credex credits.</p>
                   </div>
-                  <div className="space-y-4">
-                    <input 
-                      required 
-                      placeholder="Full Name" 
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      onChange={(e) => setLeadData({...leadData, name: e.target.value})}
-                    />
-                    <input 
-                      required 
-                      type="email" 
-                      placeholder="Work Email" 
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      onChange={(e) => setLeadData({...leadData, email: e.target.value})}
-                    />
-                    <input 
-                      required 
-                      placeholder="Company Name" 
-                      className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                      onChange={(e) => setLeadData({...leadData, company: e.target.value})}
-                    />
-                  </div>
-                  <button 
-                    disabled={loading}
-                    type="submit" 
-                    className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 flex justify-center items-center gap-2"
-                  >
-                    {loading ? <Loader2 className="animate-spin" /> : "Apply Savings Now"}
+                 <div className="space-y-4">
+                 <input 
+                 required 
+                placeholder="Your Name" 
+                className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+                onChange={(e) => setLeadData({...leadData, name: e.target.value})} 
+                />
+                <input 
+                required 
+               type="email" 
+               placeholder="Work Email" 
+               className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+               onChange={(e) => setLeadData({...leadData, email: e.target.value})} 
+               />
+               <input 
+               required 
+               placeholder="Company" 
+               className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+               onChange={(e) => setLeadData({...leadData, company: e.target.value})} 
+                />
+               </div>
+                  <button type="submit" className="w-full bg-blue-600 text-white py-5 rounded-xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg">
+                    {loading ? <Loader2 className="animate-spin mx-auto" /> : "Verify Savings"}
                   </button>
                 </form>
               ) : (
-                <div className="text-center py-8 space-y-4">
-                  <div className="flex justify-center"><CheckCircle2 size={64} className="text-green-500" /></div>
-                  <h3 className="text-2xl font-bold text-gray-900">Application Received!</h3>
-                  <p className="text-gray-600">A Credex analyst will review your ${annualSavings.toLocaleString()} savings audit and contact you at <strong>{leadData.email}</strong> within 24 hours.</p>
-                  <button onClick={() => setIsLeadModalOpen(false)} className="text-blue-600 font-semibold underline">Back to Audit</button>
+                <div className="text-center py-10 space-y-6">
+                  <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto text-green-600">
+                    <CheckCircle2 size={48} />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-bold text-slate-900">Success!</h3>
+                    <p className="text-slate-600">Our analyst will contact <strong>{leadData.email}</strong> with your ${annualSavings.toLocaleString()} discount codes.</p>
+                  </div>
+                  <button onClick={() => setIsLeadModalOpen(false)} className="bg-slate-100 text-slate-600 px-6 py-3 rounded-xl font-semibold hover:bg-slate-200 transition-colors">
+                    Close
+                  </button>
                 </div>
               )}
             </div>
