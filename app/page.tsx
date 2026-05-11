@@ -155,26 +155,26 @@ export default function AuditTool() {
                 <form onSubmit={submitLead} className="space-y-6">
                   <div className="text-center space-y-2">
                     <h3 className="text-3xl font-black text-slate-900">Final Step</h3>
-                    <p className="text-slate-500 font-medium">Get your personalized savings report and unlock Credex credits.</p>
+                    <p className="text-slate-600 font-medium">Get your personalized savings report and unlock Credex credits.</p>
                   </div>
                  <div className="space-y-4">
                  <input 
                  required 
                 placeholder="Your Name" 
-                className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+                className="w-full p-4 bg-white border border-slate-300 rounded-xl outline-none text-black font-medium placeholder:text-slate-400 focus:border-blue-600"
                 onChange={(e) => setLeadData({...leadData, name: e.target.value})} 
                 />
                 <input 
                 required 
                type="email" 
                placeholder="Work Email" 
-               className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+              className="w-full p-4 bg-white border border-slate-300 rounded-xl outline-none text-black font-medium placeholder:text-slate-400 focus:border-blue-600"
                onChange={(e) => setLeadData({...leadData, email: e.target.value})} 
                />
                <input 
                required 
                placeholder="Company" 
-               className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-500" 
+               className="w-full p-4 bg-white border border-slate-300 rounded-xl outline-none text-black font-medium placeholder:text-slate-400 focus:border-blue-600"
                onChange={(e) => setLeadData({...leadData, company: e.target.value})} 
                 />
                </div>
