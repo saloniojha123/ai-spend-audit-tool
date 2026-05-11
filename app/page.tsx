@@ -13,14 +13,22 @@ export default function AuditTool() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   // --- INITIALIZATION ---
+
   useEffect(() => {
+  if (typeof window !== "undefined") {
     const saved = localStorage.getItem('audit-tools');
     if (saved) {
-      setTools(JSON.parse(saved));
+      try {
+        setTools(JSON.parse(saved));
+      } catch (e) {
+        console.error("Error loading saved tools", e);
+        setTools([{ id: Date.now(), name: "", cost: 0 }]);
+      }
     } else {
       setTools([{ id: Date.now(), name: "", cost: 0 }]);
     }
-  }, []);
+  }
+}, []);
 
   // --- HANDLERS ---
   const addTool = () => {
