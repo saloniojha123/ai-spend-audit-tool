@@ -66,13 +66,15 @@ export default function AuditTool() {
       <div className="max-w-4xl mx-auto space-y-10">
         
         {/* HEADER */}
-        <header className="space-y-2">
-          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-            AI Spend Audit Engine
-          </h1>
-          <p className="text-slate-500 text-lg">Analyze your SaaS footprint and unlock Credex arbitrage savings.</p>
-        </header>
-
+        <header className="space-y-4">
+        <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-tight">
+         Stop Burning Cash on <span className="text-blue-600">AI Subscriptions.</span>
+        </h1>
+        <p className="text-slate-600 text-xl max-w-2xl font-medium">
+         Most startups overpay for AI by 30%. Use the Credex Audit Engine to identify 
+         license bloat and unlock Enterprise-grade credits in 60 seconds.
+  </p>
+</header>
         {/* INPUT SECTION */}
         <section className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
           <div className="flex items-center gap-2 text-slate-700 font-semibold mb-2">
